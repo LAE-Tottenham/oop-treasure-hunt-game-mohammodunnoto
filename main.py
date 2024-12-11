@@ -7,12 +7,14 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Treasure Hunting Game")
 clock = pygame.time.Clock()
 player = pygame.Rect((300, 250, 50, 50))
-test_surface = pygame.image.load("graphics/pixelsky.png")
+sky1_surface = pygame.image.load("graphics/pixelsky.png")
+ground1_surface = pygame.image.load("graphics/ground1.png")
 
 run = True
 while run:
   screen.fill((0, 0, 0))
-  screen.blit(test_surface,(0,0))
+  screen.blit(sky1_surface,(0,0))
+  screen.blit(ground1_surface,(0,0))
   pygame.draw.rect(screen, (255, 0, 0), player)
  
   key = pygame.key.get_pressed()
