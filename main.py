@@ -7,14 +7,18 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Treasure Hunting Game")
 clock = pygame.time.Clock()
 player = pygame.Rect((300, 250, 50, 50))
+font1 = pygame.font.Font("font/superpixelfont.ttf", 50)
+
 sky1_surface = pygame.image.load("graphics/pixelsky.png")
 ground1_surface = pygame.image.load("graphics/ground1.png")
+text1_surface = font1.render("Its fanta", False, "Black")
 
 run = True
 while run:
   screen.fill((0, 0, 0))
   screen.blit(sky1_surface,(0,0))
-  screen.blit(ground1_surface,(0,0))
+  screen.blit(ground1_surface,(0,350))
+  screen.blit(text1_surface, (500, 100))
   pygame.draw.rect(screen, (255, 0, 0), player)
  
   key = pygame.key.get_pressed()
