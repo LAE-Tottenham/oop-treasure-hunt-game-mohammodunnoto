@@ -1,62 +1,35 @@
-from place import Place
-from player import Player
-from item import Item
+import pygame
 
-class Game():
-    def __init__(self):
-        self.current_place = None
-        # add more atributes as needed
+pygame.init()
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 900
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Treasure Hunting Game")
+clock = pygame.time.Clock()
+player = pygame.Rect((300, 250, 50, 50))
+test_surface = pygame.image.load("graphics/pixelsky.png")
+test_surface.fill("Blue")
 
-    def setup(self):
-        # here you will setup your Game
-        # places
-        home = Place('Home', 10)
-        bedroom = Place('Bedroom', 5)
-        bathroom = Place('Bathroom', 4, True) # bathroom is locked
-        garden = Place('Garden', 15)
-        shed = Place('Shed', 3)
-        cave = Place('Cave', 50)
-        
-        home.add_next_place(garden)
-        home.add_next_place(bedroom)
-        bedroom.add_next_place(bathroom)
-        garden.add_next_place(shed)
-        # etc. 
-        
-        # items
-        hammer = Item('Hammer')
-        pen = Item('Pen')
-
-        home.add_item(hammer)
-        bedroom.add_item(pen)
-
-        # home will be our starting place
-        self.current_place = home
-        
-        # finish the setup function...
-
-    def start(self):
-        print("Welcome to my game...")
-        print("Storyline...")
-        name = input("Enter player name: ")
-        player = Player(name)
-
-        print("You are currently in " + self.current_place.name)
-        self.current_place.show_next_places()
-        opt = input("""
-What would you like to do?
-1. Go to a place
-2. Pickup item
-3. Check inventory
-etc.      
-""")
-        if opt == "1":
-            # add code
-            pass
-        elif opt == "2":
-            # add code
-            pass
-        elif opt == "3":
-            # add code
-            pass
-            
+run = True
+while run:
+  screen.fill((0, 0, 0))
+  screen.blit(test_surface,(0,0))
+  pygame.draw.rect(screen, (255, 0, 0), player)
+ 
+  key = pygame.key.get_pressed()
+  if key[pygame.K_a] == True:
+    player.move_ip(-1,0)
+  if key[pygame.K_d] == True:
+    player.move_ip(1,0)
+  if key[pygame.K_w] == True:
+    player.move_ip(0,-1)
+  if key[pygame.K_s] == True:
+    player.move_ip(0,1)
+ 
+  for event in pygame.event.get():
+    if event.type == pygame.QUIT:
+      run = False
+ 
+  pygame.display.update()
+  clock.tick(60)
+pygame.quit()
