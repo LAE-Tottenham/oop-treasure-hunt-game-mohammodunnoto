@@ -8,7 +8,6 @@ pygame.display.set_caption("Treasure Hunting Game")
 clock = pygame.time.Clock()
 player = pygame.Rect((300, 250, 50, 50))
 test_surface = pygame.image.load("graphics/pixelsky.png")
-test_surface.fill("Blue")
 
 run = True
 while run:
