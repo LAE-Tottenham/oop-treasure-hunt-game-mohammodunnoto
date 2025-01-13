@@ -39,7 +39,6 @@ class Player:
 
     def die(self):
         death_message_num = random.randint(1,5)
-        os.system("clear")
         if death_message_num == 1:
             print("""You lay on the ground. 
                   Your breathing starts to become increasingly shaky and your vision starts to falter. 
@@ -103,7 +102,6 @@ class Player:
         if not self.inventory:
             print("Your inventory is empty.")
         else:
-            os.system("clear")
             print("Your inventory contains:")
             for item in self.inventory:
                 print(f"{item.name}, weighing {item.weight}g")

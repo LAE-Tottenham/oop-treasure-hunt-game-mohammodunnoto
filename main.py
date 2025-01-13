@@ -132,7 +132,7 @@ def post_boss_prompt(player, key_item_name, area):
             print("That is not a valid option.")
 
 def manage_inventory(player):
-    if player.total_weight > player.weight_limit:
+    while player.total_weight > player.weight_limit:
         print(f"\nYour inventory weight exceeds the limit ({player.total_weight}/{player.weight_limit}). You need to drop an item.")
         for i, item in enumerate(player.inventory):
             print(f"{i + 1}. {item.name} - {item.weight} kg")
@@ -144,13 +144,11 @@ def manage_inventory(player):
                     item_to_drop = player.inventory[item_choice]
                     player.drop_item(item_to_drop)
                     print(f"You dropped {item_to_drop.name}.")
-                    return
+                    break
                 else:
                     print("Please choose a valid item.")
             else:
                 print("Invalid input. Please enter a number.")
-    else:
-        print("\nYour inventory weight is within the limit.")
     
     while True:
         print("\nYour inventory:")
@@ -166,7 +164,7 @@ def manage_inventory(player):
         print("3. Drop an item")
         print("4. Back to exploring")
         
-        choice = input("Choose an option (1/2/3): ").strip()
+        choice = input("Choose an option (1/2/3/4):\n").strip()
 
         if choice == "1":
             while True:
@@ -198,7 +196,7 @@ def manage_inventory(player):
                         item_to_drop = player.inventory[item_choice]
                         player.drop_item(item_to_drop)
                         print(f"You dropped {item_to_drop.name}.")
-                        return
+                        break
                     else:
                         print("Please choose a valid item.")
                 else:
@@ -474,6 +472,25 @@ while True:
 ▄█████████▀    ██████████  ▄████████▀     ▄████▀          ██████████  ▀█   █▀  ████████▀  █▀    ▀█   █▀    ████████▀  
                                                                                                                      
 """)
+                elif choice_final == "Leave":
+                    print("You turn away from the Gatekeeper, and place the 'Fragment of the End' in the space in the pedestal next to the Gate.")
+                    time.sleep(2)
+                    print("The black rocky Gate activates, the portal swirling spontaneously with a deep purple hue.")
+                    time.sleep(2)
+                    print("You step through the portal, hoping you'll finally get to go home and sleep a little.")
+                    exit("""
+
+  _______       __  ___ __       __        _______          __ __             
+ |   _   .-----|  .'  _|__.-----|  |--.   |   _   .-----.--|  |__.-----.-----.
+ |   1___|  -__|  |   _|  |__ --|     |   |.  1___|     |  _  |  |     |  _  |
+ |____   |_____|__|__| |__|_____|__|__|   |.  __)_|__|__|_____|__|__|__|___  |
+ |:  1   |                                |:  1   |                    |_____|
+ |::.. . |                                |::.. . |                           
+ `-------'                                `-------'                           
+                                                                              
+""")
+                else:
+                    print("That is not one of the options you assessed.")
             else:
                 print("You turn away from the Gatekeeper, and place the 'Fragment of the End' in the space in the pedestal next to the Gate.")
                 time.sleep(2)
