@@ -6,7 +6,7 @@ from item import Item, Medicine, Weapon
 class Player:
     def __init__(self, name="Player"):
         self.name = name
-        self.health = 100
+        self.health = 50
         self.max_health = 100
         self.weapon = "Fists"
         self.strength = 10
