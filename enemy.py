@@ -17,7 +17,8 @@ class Enemy:
             self.die()
 
     def die(self):
-        print(f"{self.name} has been defeated!")
+        time.sleep(1)
+        print(f"{self.name} has been beaten to death!")
         self.health = 0
 
     def speak(self):

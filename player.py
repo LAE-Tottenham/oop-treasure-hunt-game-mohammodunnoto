@@ -4,7 +4,7 @@ import os
 from item import Item, Medicine, Weapon
 
 class Player:
-    def __init__(self, name="Player"):
+    def __init__(self, name="Player", current_place=None):
         self.name = name
         self.health = 50
         self.max_health = 100
@@ -12,7 +12,8 @@ class Player:
         self.strength = 10
         self.inventory = []
         self.total_weight = 0
-        self.weight_limit = 15000
+        self.weight_limit = 7500
+        self.current_place = current_place
     
     def unequip_weapon(self):
         if self.weapon == "Fists":

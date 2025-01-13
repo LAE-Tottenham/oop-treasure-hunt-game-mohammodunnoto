@@ -16,15 +16,19 @@ class Place:
 
     def add_item(self, item):
         self.available_items.append(item)
-        print(f"Item {item.name} has been added to the {self.name}.")
 
     def explore(self, player):
         print(f"\nYou are now in the {self.name}.")
         time.sleep(1)
         print(self.description)
         while True:
-            action = input(f"Do you want to explore the area, manage your inventory or go ahead?:\n").lower()
-            if action == "explore":
+            action = input(f"""Do you want to explore the area, manage your inventory or go ahead?:
+Answer with explore/manage inventory/go.\n""").lower()
+            
+            if action == "explore" or action == "explore area":
+                self.exploration_count += 1
+                if self.exploration_count >= 5 and player.current_place == place18:
+                    break
                 if not self.available_items:
                     print("You explored so thoroughly there is nothing left to find.")
                 else:
@@ -34,7 +38,8 @@ class Place:
                     player.add_to_inventory(item)
             elif action == "go ahead" or action == "go":
                 print(f"You move on to the next area.")
-            elif action == "manage inventory":
+                break
+            elif action == "manage inventory" or action == "manage":
                 manage_inventory(player)
             else:
                 print("You can't do that. Just pick one of the options.")
@@ -86,11 +91,12 @@ def fight(enemies, player):
                 if enemy.is_boss and enemy.key_item:
                     print(f"You obtained the {enemy.key_item}!")
                     player.add_to_inventory(Item(name=enemy.key_item, weight=1, description="A key item."))
+                time.sleep(1)
                 return True
 
             print(f"{enemy.name} attacks you!")
             damage_taken = enemy.damage
-
+            time.sleep(1)
             timeout = 1
             t = Timer(timeout, print, ["You missed your chance to react!"])
             t.start()
@@ -105,7 +111,7 @@ def fight(enemies, player):
                 damage_taken = 0
             elif reaction_time <= 1:
                 print("You blocked the attack and reduced damage!")
-                damage_taken *= 0.2
+                damage_taken *= 0.35
             else:
                 print("You failed to react in time!")
 
@@ -135,7 +141,7 @@ def manage_inventory(player):
     while player.total_weight > player.weight_limit:
         print(f"\nYour inventory weight exceeds the limit ({player.total_weight}/{player.weight_limit}). You need to drop an item.")
         for i, item in enumerate(player.inventory):
-            print(f"{i + 1}. {item.name} - {item.weight} kg")
+            print(f"{i + 1}. {item.name} - {item.weight} g")
         while True:
             item_choice = input("\nWhich item would you like to drop? (Enter the number):\n")
             if item_choice.isdigit():
@@ -157,6 +163,7 @@ def manage_inventory(player):
                 print(f"{idx + 1}. {item.name} - {item.description}")
         else:
             print("Your inventory is empty.")
+        print(f"Your inventory has {player.total_weight}/{player.weight_limit}g")
 
         print("\nOptions:")
         print("1. Use or equip an item")
@@ -168,7 +175,7 @@ def manage_inventory(player):
 
         if choice == "1":
             while True:
-                item_choice = input("\nWhich item would you like to use/equip? (Enter the number): ")
+                item_choice = input("\nWhich item would you like to use/equip? (Enter the number):\n")
                 if item_choice.isdigit():
                     item_choice = int(item_choice) - 1
                     if 0 <= item_choice < len(player.inventory):
@@ -179,6 +186,8 @@ def manage_inventory(player):
                             print(f"You have equipped {item.name}. Your strength is now {player.strength}.")
                         else:
                             player.use_item(item)
+                            player.inventory.pop(item_choice)
+                            player.total_weight -= item.weight
                         break
                 print("Please choose a valid item.")
 
@@ -187,20 +196,27 @@ def manage_inventory(player):
         
         elif choice == "3":
             for i, item in enumerate(player.inventory):
-                print(f"{i + 1}. {item.name} - {item.weight} kg")
+                print(f"{i + 1}. {item.name} - {item.weight} g")
             while True:
-                item_choice = input("\nWhich item would you like to drop? (Enter the number):\n")
+                item_choice = input("\nWhich item would you like to drop? (Enter the number and type 'none' if it is a mistake):\n")
                 if item_choice.isdigit():
                     item_choice = int(item_choice) - 1
                     if 0 <= item_choice < len(player.inventory):
                         item_to_drop = player.inventory[item_choice]
+                        if item_to_drop.name == player.weapon:
+                            print(f"\nYou unequipped {item_to_drop.name}.")
+                            player.unequip_weapon()
                         player.drop_item(item_to_drop)
                         print(f"You dropped {item_to_drop.name}.")
                         break
                     else:
                         print("Please choose a valid item.")
                 else:
-                    print("Invalid input. Please enter a number.")
+                    if item_choice.lower() == "none":
+                        print("You chose not to drop an item.")
+                        break
+                    else:
+                        print("Invalid input. Please enter a number.")
 
         elif choice == "4":
             print("Returning to exploration...")
@@ -223,102 +239,103 @@ print("""With no memory of what happened, no clear direction, you have no idea w
           You stand up, feeling disoriented, but something urges you forward. You take a step into the mist, left with no other conclusion about what to do.""")
 name = input("\nYour head aches immensely but you hope it will go away with time. What was your name again:\n")
 player = Player(name)
-print("\nYeah, that was your name. Here starts your journey.")
+print("\nYeah, that was your name. Here starts your journey.\n")
+time.sleep(3)
 
 place1 = Place("???", "You just woke up here. You have no idea where you are.", [Enemy("Unhappy Squirrel", 15, 3)])
-place1.add_item(Item("Mossy Stone", 100, "A smooth stone covered in moss. Might be useful for something."))
+place1.add_item(Item("Mossy Stone", 100, "A smooth stone covered in moss. Might be useful for something.", "Misc"))
 fight(place1.enemies, player)
 place1.explore(player)
 place2 = Place("Thicket", "An area of thicker trees. The trees are dense and intertwined, making movement difficult.", None)
 place2.add_item(Medicine("Small Healing Herb", 20, "A bundle of herbs that may help with wounds.", 15))
-place2.add_item(Item("Broken Compass", 200, "A compass with a cracked face, but it still points North."))
+place2.add_item(Item("Broken Compass", 200, "A compass with a cracked face, but it still points North.", "Misc"))
 place2.explore(player)
-place3 = Place("The Crumbled Bridge", "You come across a broken bridge, barely hanging over a deep ravine. The mist swirls beneath.", [Enemy("Bridge Guardian", 25, 5, False, "You shall not pass!")])
-print("Rocks and stones levitate together to the same spot, forming into a rock guardian.")
+place3 = Place("The Crumbled Bridge", "You come across a broken bridge, barely hanging over a deep ravine. The mist swirls beneath.", [Enemy("Bridge Guardian", 25, 5, False, "'You shall not pass!'")])
+print("\nRocks and stones levitate together to the same spot, forming into a rock guardian.")
 fight(place3.enemies, player)
 place3.explore(player)
 place4 = Place("The Hollow", "A small hollow in the forest where the trees form a perfect circle around you.", [Enemy("Feral Shade", 30, 6)])
 place4.add_item(Medicine("Herbal Medicine", 100, "A soothing medicine made from forest herbs, good for healing.", 25))
-print("A feral shade jumps out at you from the dark.")
+print("\nA feral shade jumps out at you from the dark.")
 fight(place4.enemies, player)
 place4.explore(player)
 place5 = Place("The Ancient Oak", "A massive oak tree stands in the middle of a clearing. Its branches are twisted, and a strange energy seems to pulse from it.", [Enemy("Forest Titan", 60, 10)])
 place5.add_item(Weapon("Ritual Dagger", 500, "An ornate dagger with strange symbols carved into its blade.", 15))
-place5.add_item(Item("Pine Sap", 50, "A small jar of sticky pine sap that could be useful for crafting."))
-print("The forest titan, unhappy at your unnatural presence, decides to do something about you.")
+place5.add_item(Item("Pine Sap", 50, "A small jar of sticky pine sap that could be useful for crafting.", "Misc"))
+print("\nThe forest titan, unhappy at your unnatural presence, decides to do something about you.")
 fight(place5.enemies, player)
 place5.explore(player)
 place6 = Place("The Marshlands", "A wet, mucky area filled with deep puddles and decaying vegetation.", [Enemy("Mud Serpent", 40, 8)])
 place6.add_item(Medicine("Swamp Fungus", 30, "A dark purple fungus that may have medicinal properties.", 20))
-place6.add_item(Item("Clay Jar", 250, "A small jar filled with muddy water. It's hard to tell its purpose."))
-print("A mud serpent comes out and tries to attack you, wanting to make you its next prey.")
+place6.add_item(Item("Clay Jar", 250, "A small jar filled with muddy water. It's hard to tell its purpose.", "Misc"))
+print("\nA mud serpent comes out and tries to attack you, wanting to make you its next prey.")
 fight(place6.enemies, player)
 place6.explore(player)
 place7 = Place("The Hollowed-out Tree", "You find a massive hollowed tree, offering shelter from the ever-thickening mist. But something feels off.", [Enemy("Tree Ent", 45, 9)])
 place7.add_item(Weapon("Vine Whip", 600, "A long vine wrapped tightly, it can be used as a weapon or for climbing.", 10))
 place7.add_item(Medicine("Herbal Medicine", 100, "A soothing medicine made from forest herbs, good for healing.", 25))
-print("A tree ent comes swinging out of the trees to attack you.")
+print("\nA tree ent comes swinging out of the trees to attack you.")
 fight(place7.enemies, player)
 place7.explore(player)
-place8 = Place("The Ruins", "Old, crumbled stone ruins emerge from the mist, half-sunken into the ground. Forgotten symbols mark the stone.", [Enemy("Ancient Guardian", 50, 10, False, "Leave my ruin now. Leave and don't turn back.")])
+place8 = Place("The Ruins", "Old, crumbled stone ruins emerge from the mist, half-sunken into the ground. Forgotten symbols mark the stone.", [Enemy("Ancient Guardian", 50, 10, False, "'Leave my ruin now. Leave and don't turn back.'")])
 place8.add_item(Weapon("Shattered Amulet", 200, "A piece of a glowing amulet. It seems to hum when touched.", 5))
-place8.add_item(Item("Dusty Relic", 350, "A small object, covered in dust, with intricate carvings."))
-print("An ancient guardian, wary of your presence and intentions, attacks you to preserve the ruins it guards.")
+place8.add_item(Item("Dusty Relic", 350, "A small object, covered in dust, with intricate carvings.", "Misc"))
+print("\nAn ancient guardian, wary of your presence and intentions, attacks you to preserve the ruins it guards.")
 fight(place8.enemies, player)
 place8.explore(player)
 place9 = Place("The Clearing", "A quiet, open area bathed in soft sunlight. A small stream flows nearby, offering some comfort. There seems to be no enemies here.", None)
 place9.add_item(Weapon("Streamstone", 100, "A smooth, round stone that hums when placed in water.", 0))
 place9.add_item(Medicine("Cleansing Herb", 40, "A rare herb used to detoxify poisons.", 30))
-place9.add_item(Item("Small Beak", 50, "A rugged beak which seems to have been dismembered from a small bird."))
+place9.add_item(Item("Small Beak", 50, "A rugged beak which seems to have been dismembered from a small bird.", "Misc"))
 place9.explore(player)
-place10 = Place("Abandoned Camp", "You stumble upon a deserted camp. Burnt-out fires and tattered tents suggest it’s been abandoned for a long time.", [Enemy("Rogue Scavenger", 60, 14, False, "Gimme your stuff! I need to earn a living!")])
+place10 = Place("Abandoned Camp", "You stumble upon a deserted camp. Burnt-out fires and tattered tents suggest it’s been abandoned for a long time.", [Enemy("Rogue Scavenger", 60, 14, False, "'Gimme your stuff! I need to earn a living!'")])
 place10.add_item(Weapon("Rusty Axe", 1000, "An old, worn-out axe. Heavy, but still sharp.", 18))
-place10.add_item(Item("Tattered Map", 50, "A map that shows part of the forest. It's missing some pieces."))
+place10.add_item(Item("Tattered Map", 50, "A map that shows part of the forest. It's missing some pieces.", "Misc"))
 place10.add_item(Medicine("Dried Berries", 10, "Edible berries that restore some health.", 10))
-print("A rogue scavenger, in the area to search for any treasures or anything valuable stumbles upon you, a treasure trove of items, and decides they would like to loot you by force.")
+print("\nA rogue scavenger, in the area to search for any treasures or anything valuable stumbles upon you, a treasure trove of items, and decides they would like to loot you by force.")
 fight(place10.enemies, player)
 place10.explore(player)
 place11 = Place("Overgrown Path", "A barely visible trail covered with dense vegetation. Every step is a struggle.", [Enemy("Venomous Vine", 65, 15)])
 place11.add_item(Weapon("Machete", 800, "A sharp blade designed to cut through thick vegetation.", 15))
-place11.add_item(Item("Jar of Sap", 300, "A sticky jar of sap that might be useful for crafting or traps."))
-print("The forest doesn't seem to like you as much as you don't like it. A sentient vine attacks you for seemingly no reason.")
+place11.add_item(Item("Jar of Sap", 300, "A sticky jar of sap that might be useful for crafting or traps.", "Misc"))
+print("\nThe forest doesn't seem to like you as much as you don't like it. A sentient vine attacks you for seemingly no reason.")
 fight(place11.enemies, player)
 place11.explore(player)
 place12 = Place("Echoing Cave", "A dark, damp cave that amplifies every sound. Dripping water echoes eerily around you.", [Enemy("Echoing Wraith", 70, 16)])
-place12.add_item(Item("Glowing Crystal", 500, "A mysterious crystal that emits a faint light."))
+place12.add_item(Item("Glowing Crystal", 500, "A mysterious crystal that emits a faint light.", "Misc"))
 place12.add_item(Medicine("Energy Potion", 250, "A potion that restores your stamina and slightly heals you.", 20))
 fight(place12.enemies, player)
 place12.explore(player)
-place13 = Place("Sunken Ruins", "Half-submerged ruins, with stagnant water pooling in the cracks. The air smells of decay.", [Enemy("Swamp Demon", 75, 17, False, "Get out of my swamp!")])
+place13 = Place("Sunken Ruins", "Half-submerged ruins, with stagnant water pooling in the cracks. The air smells of decay.", [Enemy("Swamp Demon", 75, 17, False, "'Get out of my swamp!'")])
 place13.add_item(Weapon("Trident Fragment", 400, "A broken trident piece, jagged but sharp.", 14))
 place13.add_item(Medicine("Purifying Elixir", 300, "A rare liquid that heals and removes poison effects.", 30))
-place13.add_item(Item("Shattered Scale", 950, "What seems to only just be a broken scale for weighing 2 items. Might have some use?"))
-print("")
+place13.add_item(Item("Shattered Scale", 950, "What seems to only just be a broken scale for weighing 2 items. Might have some use?", "Misc"))
+print("\nAs you stumble into a swamp, an angry-looking Swamp Demon notices you, deeming you unwelcome in his swamp.")
 fight(place13.enemies, player)
 place13.explore(player)
 place14 = Place("Whispering Woods", "The trees seem to whisper as the wind blows, and you feel unseen eyes watching you.", [Enemy("Shadow Stalker", 80, 18)])
-place14.add_item(Item("Whispering Amulet", 200, "An amulet that seems to hum faintly, as if alive."))
+place14.add_item(Item("Whispering Amulet", 200, "An amulet that seems to hum faintly, as if alive.", "Misc"))
 place14.add_item(Medicine("Mystic Herb", 50, "A glowing herb that heals and increases resistance to magic.", 25))
-print("Something emerges from the shadows. You noticed the feeling of being watched ever since you left the last area, but to think it was coming from the shadows themselves.")
+print("\nSomething emerges from the shadows. You noticed the feeling of being watched ever since you left the last area, but to think it was coming from the shadows themselves.")
 fight(place14.enemies, player)
 place14.explore(player)
 place15 = Place("Cliffside", "A narrow, precarious path along a cliff. The wind howls and the ground feels unstable.", [Enemy("Harpy", 85, 20)])
 place15.add_item(Weapon("Throwing Knives", 300, "A set of lightweight knives for ranged combat.", 12))
-place15.add_item(Item("Rope Ladder", 1000, "A rope ladder for climbing down steep cliffs."))
+place15.add_item(Item("Rope Ladder", 1000, "A rope ladder for climbing down steep cliffs.", "Misc"))
 place15.add_item(Medicine("Big Yellow Eye", 500, "A stupidly massive yellow eye from God knows where. Is probably packed with nutrients.", 15))
-print("From the sky a harpy swoops down on you, ready to feast.")
+print("\nFrom the sky a harpy swoops down on you, ready to feast.")
 fight(place15.enemies, player)
 place15.explore(player)
 place16 = Place("Frozen Glade", "A clearing blanketed with snow. The cold bites at your skin, and the air feels heavy.", [Enemy("Frost Wolf", 90, 22), Enemy("Frost Wolf", 90, 22)])
 place16.add_item(Medicine("Warmth Potion", 200, "A potion that restores health and protects against the cold.", 25))
-place16.add_item(Item("Icicle Shard", 300, "A shard of ice that doesn’t melt, no matter the temperature."))
-print("From the glade, a pair of Frost Wolves surround and encircle you, trying to earn their next meal.")
+place16.add_item(Item("Icicle Shard", 300, "A shard of ice that doesn’t melt, no matter the temperature.", "Misc"))
+print("\nFrom the glade, a pair of Frost Wolves surround and encircle you, trying to earn their next meal.")
 fight(place16.enemies, player)
 place16.explore(player)
-place17 = Place("Crystalline Cavern", "A shimmering cave filled with crystals that refract light into rainbows.", [Enemy("Crystal Golem", 95, 30, False, "Beep Beep.")])
+place17 = Place("Crystalline Cavern", "A shimmering cave filled with crystals that refract light into rainbows.", [Enemy("Crystal Golem", 95, 30, False, "'Beep Beep.'")])
 place17.add_item(Weapon("Crystal Spear", 700, "A spear made of glowing crystal, sharp and deadly.", 20))
-place17.add_item(Item("Shimmering Gem", 250, "A rare gem that glows faintly in the dark."))
-print("A Crystal Golem forms in front of you in a similar manner to the Bridge Guardian you previously encountered. Why is it here in a cave though Is it protecting something?")
+place17.add_item(Item("Shimmering Gem", 250, "A rare gem that glows faintly in the dark.", "Misc"))
+print("\nA Crystal Golem forms in front of you in a similar manner to the Bridge Guardian you previously encountered. Why is it here in a cave though. Is it protecting something?")
 fight(place17.enemies, player)
 place17.explore(player)
 
@@ -328,8 +345,9 @@ place18 = Place(
     The air is cold, and a strange silence fills the space. Something about this place feels unnatural.""",
     None
 )
-place18.add_item(Item("Shadowed Pendant", 200, "A mysterious pendant that absorbs light around it."))
+place18.add_item(Item("Shadowed Pendant", 200, "A mysterious pendant that absorbs light around it.", "Misc"))
 place18.add_item(Medicine("Elixir of Light", 300, "A glowing potion that restores health and grants temporary resistance to shadow attacks.", 40))
+player.current_place == place18
 while True:
     place18.explore(player)
     if not place18.available_items:
@@ -391,7 +409,7 @@ place19 = Place(
     yet there’s no visible source of light. The air here feels heavy, like the forest is holding its breath, waiting for something.""",
     [Enemy("Twilight Stag", 70, 25)]
 )
-place19.add_item(Item("Twilight Shard", 300, "A fragment of light and shadow, pulsating with a strange energy."))
+place19.add_item(Item("Twilight Shard", 300, "A fragment of light and shadow, pulsating with a strange energy.", "Misc"))
 place19.add_item(Weapon("Silverfang Dagger", 800, "A sharp dagger that glints with an otherworldly light.", 30))
 if "Twilight" in [item.name for item in player.inventory]:
     essence_heal = player.max_health
@@ -410,7 +428,7 @@ place20 = Place(
         Enemy("The Abyssal Gatekeeper", 200, 40, is_boss=True, key_item="Fragment of the End")
     ]
 )
-place20.add_item(Item("Gate Key Fragment", 500, "A jagged piece of a mysterious key, pulsing with ominous energy."))
+place20.add_item(Item("Gate Key Fragment", 500, "A jagged piece of a mysterious key, pulsing with ominous energy.", "Misc"))
 
 while True:
     place20.explore(player)
