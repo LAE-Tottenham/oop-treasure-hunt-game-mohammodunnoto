@@ -42,25 +42,25 @@ class Player:
         death_message_num = random.randint(1,5)
         if death_message_num == 1:
             print("""You lay on the ground. 
-                  Your breathing starts to become increasingly shaky and your vision starts to falter. 
-                  Your short life flashes by your eyes as you bleed. 
-                  You accept your fate as you breathe your last.""")
+Your breathing starts to become increasingly shaky and your vision starts to falter. 
+Your short life flashes by your eyes as you bleed. 
+You accept your fate as you breathe your last.""")
         elif death_message_num == 2:
             print("""Life slowly fades from you with each passing moment.
-                  Darkness closes in on your vision as you gradually, painfully lose your strenght
-                  Your breathing abruptly stops, leaving only silence.""")
+Darkness closes in on your vision as you gradually, painfully lose your strenght
+Your breathing abruptly stops, leaving only silence.""")
         elif death_message_num == 3:
             print("""Weakness overtakes you step by step.
-                  Your breath grows shallow, and vision fades.
-                  You can fight no longer, as you meet your end.""")
+Your breath grows shallow, and vision fades.
+You can fight no longer, as you meet your end.""")
         elif death_message_num == 4:
             print("""Your body trembles as your wounds take their toll.
-                  Your breath becomes shallow, your vision dimming with each passing second.
-                  The world slips away, and soon your consciousness fades into nothing.""")
+Your breath becomes shallow, your vision dimming with each passing second.
+The world slips away, and soon your consciousness fades into nothing.""")
         elif death_message_num == 5:
             print("""Blood stains your hands and clothes as strength fades from your limbs.
-                  Your breath comes in ragged gasps, each one harder than the last.
-                  The world blurs as you collapse, never to get back up.""")
+Your breath comes in ragged gasps, each one harder than the last.
+The world blurs as you collapse, never to get back up.""")
         time.sleep(3)
         exit("""
 ▓██   ██▓ ▒█████   █    ██    ▓█████▄  ██▓▓█████ ▓█████▄ 

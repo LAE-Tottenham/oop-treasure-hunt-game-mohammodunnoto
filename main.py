@@ -68,7 +68,6 @@ def fight(enemies, player):
                 if not player.inventory:
                     print("Your inventory is empty.")
                     continue
-
                 print("\nYour inventory:")
                 for i, item in enumerate(player.inventory):
                     print(f"{i + 1}. {item.name}")
@@ -85,6 +84,11 @@ def fight(enemies, player):
                             print("Please choose a valid item from the list.")
                     else:
                         print("Please enter a valid number.")
+            elif action == "dio":
+                print("Fight skipped - Auto Won")
+                break
+            else:
+                print("That is not an option")
 
             if enemy.health <= 0:
                 enemy.die()
@@ -118,8 +122,8 @@ def fight(enemies, player):
             player.take_damage(int(damage_taken))
             if player.health <= 0:
                 player.die()
-
-    return False
+                return False
+    return True
 
 def post_boss_prompt(player, key_item_name, area):
     while True:
@@ -238,7 +242,7 @@ print("""With no memory of what happened, no clear direction, you have no idea w
           The first thing you notice is the silence. There are no animals chirping, no insects buzzing. It’s as if the entire forest is holding its breath.
           You stand up, feeling disoriented, but something urges you forward. You take a step into the mist, left with no other conclusion about what to do.""")
 name = input("\nYour head aches immensely but you hope it will go away with time. What was your name again:\n")
-player = Player(name)
+player = Player(name, None)
 print("\nYeah, that was your name. Here starts your journey.\n")
 time.sleep(3)
 
@@ -343,14 +347,14 @@ place18 = Place(
     "Shadowed Clearing",
     """You step into an eerily dark but open patch of the forest. No canopy overhead, yet the sunlight doesn’t seem to reach here.
     The air is cold, and a strange silence fills the space. Something about this place feels unnatural.""",
-    None
+    [Enemy("The Monster in the Black Forest, The Apocalypse Bird", 300, 40, is_boss=True)]
 )
 place18.add_item(Item("Shadowed Pendant", 200, "A mysterious pendant that absorbs light around it.", "Misc"))
 place18.add_item(Medicine("Elixir of Light", 300, "A glowing potion that restores health and grants temporary resistance to shadow attacks.", 40))
 player.current_place == place18
 while True:
     place18.explore(player)
-    if not place18.available_items:
+    if place18.exploration_count >= 5:
         print("\nAfter thoroughly exploring the clearing, you notice a stone pedestal in the center. "
               "It has shallow carvings that seem to depict three objects: a large eye, a shattered scale, and a small beak.")
         
@@ -387,22 +391,21 @@ while True:
             time.sleep(2)
             print("To protect the forest, it decided that the only thing it could do was to eliminate the 'monster'.")
             time.sleep(3)
-            print("It is **The Monster in the Black Forest, The Apocalypse Bird.**")
+            print("It is The Monster in the Black Forest, The Apocalypse Bird.")
 
-            apocalypse_bird = Enemy("The Monster in the Black Forest, The Apocalypse Bird", 300, 40, is_boss=True)
-            fight(apocalypse_bird, player)
-            
-            if apocalypse_bird.health <= 0:
+            if fight(place18.enemies, player) == True:
                 print("\nWith a final strike, the Apocalypse Bird collapses. Its massive form dissolves into glowing feathers, leaving behind a weapon.")
                 twilight_weapon = Weapon("Twilight", 0, "A fragment of the Apocalypse Bird. Feels incredibly light in your hands, despite being so massive.", 40)
                 player.add_to_inventory(twilight_weapon)
-                print("You have obtained **Twilight**, a weapon of immense power.")
+                print("You have obtained Twilight, a weapon of immense power.")
             break
         else:
             print("\nThe carvings seem to call for three specific items. You feel like you're missing something.")
             print("For now, there's nothing more to do here.")
             break
-
+    else:
+        break
+time.sleep(4)
 place19 = Place(
     "Twilight Grove",
     """The forest begins to thin, revealing a glade bathed in an eerie twilight. The sky above is a strange, swirling mix of purple and gold,
@@ -418,6 +421,8 @@ else:
 place19.add_item(Medicine("Essence of Darkness", 250, "A strange black, tar-like liquid is present inside a vial. What is it?", essence_heal))
 fight(place19.enemies, player)
 place19.explore(player)
+twilight_weapon = Weapon("Twilight", 0, "A fragment of the Apocalypse Bird. Feels incredibly light in your hands, despite being so massive.", 40)
+player.add_to_inventory(twilight_weapon)
 place20 = Place(
     "The Abyssal Gate",
     """You find yourself standing before a towering gate of black stone, adorned with intricate carvings that seem to shift and writhe as you stare at them.
@@ -432,19 +437,21 @@ place20.add_item(Item("Gate Key Fragment", 500, "A jagged piece of a mysterious 
 
 while True:
     place20.explore(player)
+    if place20.available_items:
+        print("Try exploring the area first.")
     if not place20.available_items:
         print("\nAs you approach the gate, the carvings on its surface glow faintly. The air grows impossibly cold.")
         for i in range(len(place20.enemies) - 1):
             enemy = place20.enemies[i]
             print(f"\nA chilling presence manifests before you: {enemy.name} emerges from the shadows!")
-            fight(enemy, player)
+            fight([enemy], player)
 
         gatekeeper = place20.enemies[2]
         print(f"\nWith the minions defeated, a booming voice echoes through the air.")
         print(f"'I am the Gatekeeper. With the blood of the forest on your hands and the sins of your killings on your soul, you are not worthy to pass through and reach salvation.'")
         print(f"\nThe ground shakes as {gatekeeper.name} steps forward, wielding immense power!")
 
-        if fight(gatekeeper, player):
+        if fight([gatekeeper], player):
             print("\nWith a final blow, the Abyssal Gatekeeper collapses, his body shattered, leaving behind a shimmering object.")
             time.sleep(2)
             print("You have obtained the 'Fragment of the End', a piece that looks necessary to unlock the gate.")
@@ -457,29 +464,30 @@ while True:
                 time.sleep(2)
                 print("You now have a choice. You can either leave through the gateway, hopefully to home, or ensure the forest's safety.")
                 time.sleep(2)
-                choice_final = input("What will you do - Protect or Leave?")
-                if choice_final == "Protect":
-                    print("""You contemplate whether protecting is the right decision as you hear a feeble rumbling behind you.""")
-                    time.sleep(2)
-                    print("You turn around, only to meet the previously defeated Abyssal Gatekeeper face to face.")
-                    time.sleep(2)
-                    print("You stand on guard, weary of the suddenly resurrected Gatekeeper, unsure if you can win another fight.")
-                    time.sleep(2)
-                    print("However, the Gatekeeper instead converses with you.")
-                    time.sleep(2)
-                    print("'I have seen your intentions. I wasn't fully mistaken, as you aren't a good person, but not an evil one either, thinking about the wellbeing of the forest.'")
-                    time.sleep(2)
-                    print("'Worry not, as you do not have to remain here. If you leave 'Twilight' to me, I can resurrect the Apocalypse Bird to guard the forest.'")
-                    time.sleep(2)
-                    print("You hand the Gatekeeper 'Twilight', unsure about whether to trust him or not, but it doesn't really matter to you if he is or isn't as long as you can leave.")
-                    time.sleep(2)
-                    print("You turn away from the Gatekeeper, and place the 'Fragment of the End' in the space in the pedestal next to the Gate.")
-                    time.sleep(2)
-                    print("The black rocky Gate activates, the portal swirling spontaneously with a deep purple hue.")
-                    time.sleep(2)
-                    print("You step through the portal, hoping you'll finally get to go home and sleep a little.")
-                    time.sleep(2)
-                    exit("""
+                while True:
+                    choice_final = input("What will you do - Protect or Leave?\n")
+                    if choice_final.lower() == "protect":
+                        print("""You contemplate whether protecting is the right decision as you hear a feeble rumbling behind you.""")
+                        time.sleep(2)
+                        print("You turn around, only to meet the previously defeated Abyssal Gatekeeper face to face.")
+                        time.sleep(2)
+                        print("You stand on guard, weary of the suddenly resurrected Gatekeeper, unsure if you can win another fight.")
+                        time.sleep(2)
+                        print("However, the Gatekeeper instead converses with you.")
+                        time.sleep(2)
+                        print("'I have seen your intentions. I wasn't fully mistaken, as you aren't a good person, but not an evil one either, thinking about the wellbeing of the forest.'")
+                        time.sleep(2)
+                        print("'Worry not, as you do not have to remain here. If you leave 'Twilight' to me, I can resurrect the Apocalypse Bird to guard the forest.'")
+                        time.sleep(2)
+                        print("You hand the Gatekeeper 'Twilight', unsure about whether to trust him or not, but it doesn't really matter to you if he is or isn't as long as you can leave.")
+                        time.sleep(2)
+                        print("You turn away from the Gatekeeper, and place the 'Fragment of the End' in the space in the pedestal next to the Gate.")
+                        time.sleep(2)
+                        print("The black rocky Gate activates, the portal swirling spontaneously with a deep purple hue.")
+                        time.sleep(2)
+                        print("You step through the portal, hoping you'll finally get to go home and sleep a little.")
+                        time.sleep(2)
+                        exit("""
 ▀█████████▄     ▄████████    ▄████████     ███             ▄████████ ███▄▄▄▄   ████████▄   ▄█  ███▄▄▄▄      ▄██████▄  
   ███    ███   ███    ███   ███    ███ ▀█████████▄        ███    ███ ███▀▀▀██▄ ███   ▀███ ███  ███▀▀▀██▄   ███    ███ 
   ███    ███   ███    █▀    ███    █▀     ▀███▀▀██        ███    █▀  ███   ███ ███    ███ ███▌ ███   ███   ███    █▀  
@@ -489,26 +497,27 @@ while True:
   ███    ███   ███    ███    ▄█    ███     ███            ███    ███ ███   ███ ███   ▄███ ███  ███   ███   ███    ███ 
 ▄█████████▀    ██████████  ▄████████▀     ▄████▀          ██████████  ▀█   █▀  ████████▀  █▀    ▀█   █▀    ████████▀  
                                                                                                                      
-""")
-                elif choice_final == "Leave":
-                    print("You turn away from the Gatekeeper, and place the 'Fragment of the End' in the space in the pedestal next to the Gate.")
-                    time.sleep(2)
-                    print("The black rocky Gate activates, the portal swirling spontaneously with a deep purple hue.")
-                    time.sleep(2)
-                    print("You step through the portal, hoping you'll finally get to go home and sleep a little.")
-                    exit("""
+                                                                                                                        
+    """)
+                    elif choice_final.lower() == "leave":
+                        print("You turn away from the Gatekeeper, and place the 'Fragment of the End' in the space in the pedestal next to the Gate.")
+                        time.sleep(2)
+                        print("The black rocky Gate activates, the portal swirling spontaneously with a deep purple hue.")
+                        time.sleep(2)
+                        print("You step through the portal, hoping you'll finally get to go home and sleep a little.")
+                        exit("""
 
-  _______       __  ___ __       __        _______          __ __             
- |   _   .-----|  .'  _|__.-----|  |--.   |   _   .-----.--|  |__.-----.-----.
- |   1___|  -__|  |   _|  |__ --|     |   |.  1___|     |  _  |  |     |  _  |
- |____   |_____|__|__| |__|_____|__|__|   |.  __)_|__|__|_____|__|__|__|___  |
- |:  1   |                                |:  1   |                    |_____|
- |::.. . |                                |::.. . |                           
- `-------'                                `-------'                           
-                                                                              
-""")
-                else:
-                    print("That is not one of the options you assessed.")
+    _______       __  ___ __       __        _______          __ __             
+    |   _   .-----|  .'  _|__.-----|  |--.   |   _   .-----.--|  |__.-----.-----.
+    |   1___|  -__|  |   _|  |__ --|     |   |.  1___|     |  _  |  |     |  _  |
+    |____   |_____|__|__| |__|_____|__|__|   |.  __)_|__|__|_____|__|__|__|___  |
+    |:  1   |                                |:  1   |                    |_____|
+    |::.. . |                                |::.. . |                           
+    `-------'                                `-------'                           
+                                                                                
+    """)
+                    else:
+                        print("That is not one of the options you assessed.")
             else:
                 print("You turn away from the Gatekeeper, and place the 'Fragment of the End' in the space in the pedestal next to the Gate.")
                 time.sleep(2)
@@ -527,6 +536,7 @@ while True:
         else:
             print("\nYou failed to defeat the Abyssal Gatekeeper. The gate remains locked, and your story ends here.")
             exit("""
+
  ▄▄▄▄   ▄▄▄     ▓█████▄    ▓█████ ███▄    █▓█████▄ ██▓███▄    █  ▄████ 
 ▓█████▄▒████▄   ▒██▀ ██▌   ▓█   ▀ ██ ▀█   █▒██▀ ██▓██▒██ ▀█   █ ██▒ ▀█▒
 ▒██▒ ▄█▒██  ▀█▄ ░██   █▌   ▒███  ▓██  ▀█ ██░██   █▒██▓██  ▀█ ██▒██░▄▄▄░
@@ -536,5 +546,6 @@ while True:
 ▒░▒   ░  ▒   ▒▒ ░░ ▒  ▒     ░ ░  ░ ░░   ░ ▒░░ ▒  ▒ ▒ ░ ░░   ░ ▒░ ░   ░ 
  ░    ░  ░   ▒   ░ ░  ░       ░     ░   ░ ░ ░ ░  ░ ▒ ░  ░   ░ ░░ ░   ░ 
  ░           ░  ░  ░          ░  ░        ░   ░    ░          ░      ░ 
-      ░          ░                          ░                          """)
+      ░          ░                          ░                          
+""")
         break
